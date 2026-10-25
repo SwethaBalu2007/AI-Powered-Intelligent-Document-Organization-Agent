@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuAgent — Intelligent Document Organization</title>
+    <!-- Clean, human-designed desktop typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="desktop-layout">
+    <div class="app-shell">
+        <!-- 1. LEFT NAVIGATION SIDEBAR -->
+        <aside class="app-sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-mark">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">DocuAgent</span>
+                    <span class="brand-edition">Desktop Organizer</span>
+                </div>
+            </div>
+
+            <!-- Primary Navigation List -->
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Navigation</div>
+                <button class="nav-item active" data-view="viewClassification" id="navClassification">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <span>Classification Results</span>
+                    <span class="nav-counter" id="navCounterBadge">0</span>
+                </button>
+
+                <button class="nav-item" data-view="viewLedger" id="navLedger">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <span>Searchable Ledger</span>
+                </button>
+
+                <button class="nav-item" data-view="viewRelated" id="navRelated">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    <span>Related Documents</span>
+                </button>
+
+                <button class="nav-item" data-view="viewAudit" id="navAudit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Activity History</span>
+                </button>
+
+                <button class="nav-item" data-view="viewOverview" id="navOverview">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Document Overview</span>
+                </button>
+
+                <div class="nav-section-title">Filesystem Actions</div>
+                <button class="nav-subitem" id="btnOpenNewFolderModal">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        <line x1="12" y1="11" x2="12" y2="17"></line>
+                        <line x1="9" y1="14" x2="15" y2="14"></line>
+                    </svg>
+                    <span>Create New Folder</span>
+                </button>
+
+                <button class="nav-subitem" id="btnOpenUploadModal">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Upload Documents (Optional)</span>
+                </button>
+            </nav>
+
+            <!-- Sidebar Footer Status -->
+            <div class="sidebar-footer">
+                <div class="system-status-indicator">
+                    <span class="status-dot online"></span>
+                    <span class="status-text" id="sidebarStatusText">Ready</span>
+                </div>
+                <div class="sqlite-label">SQLite Local DB Active</div>
+            </div>
+        </aside>
+
+        <!-- 2. CENTER MAIN WORKSPACE -->
+        <main class="app-workspace">
+            <!-- Top Control & Header Bar -->
+            <header class="workspace-header">
+                <div class="header-path-container">
+                    <span class="path-label">Active Folder:</span>
+                    <div class="path-display-box" id="activeFolderDisplay" title="No folder selected">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span class="path-string" id="activePathText">No folder loaded. Enter path or browse below.</span>
+                    </div>
+                </div>
+
+                <div class="header-badges">
+                    <div class="mode-badge read-only" id="modeBadge">
+                        <span class="mode-dot"></span>
+                        <span id="modeBadgeText">READ-ONLY MODE</span>
+                    </div>
+                    <div class="status-badge" id="workflowStatusBadge">Ready</div>
+                </div>
+            </header>
+
+            <!-- Folder Path Input & Native Browser Controls -->
+            <section class="folder-control-panel">
+                <div class="path-input-group">
+                    <label for="folderPathInput" class="input-label">Enter Folder Path</label>
+                    <div class="input-action-row">
+                        <div class="input-wrapper">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            </svg>
+                            <input type="text" id="folderPathInput" placeholder="C:\Users\YourName\Downloads\College_Documents" spellcheck="false" autocomplete="off">
+                        </div>
+                        <button class="btn btn-outline" id="btnValidatePath" title="Check path existence and directory permissions">
+                            Validate Path
+                        </button>
+                        <button class="btn btn-primary" id="btnLoadFolder" title="Load and analyze documents from this path">
+                            Load Folder
+                        </button>
+                        <span class="divider-v"></span>
+                        <button class="btn btn-secondary" id="btnBrowseFolder" title="Open native Windows Folder Picker">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            Browse Folder
+                        </button>
+                        <button class="btn btn-ghost" id="btnLoadSample" title="Load generated Sample_College_Documents test suite">
+                            Sample Folder
+                        </button>
+                    </div>
+                    <!-- Path Validation Feedback Banner -->
+                    <div class="validation-message" id="validationFeedback" style="display: none;"></div>
+                </div>
+            </section>
+
+            <!-- VIEW 1: Classification Results & Proposed Tree -->
+            <div class="workspace-view active" id="viewClassification">
+                <div class="view-toolbar">
+                    <div class="view-title-block">
+                        <h2 class="view-heading">Classification Results</h2>
+                        <span class="view-subheading" id="viewSubheading">Read-only document analysis. Review and edit categories before approval.</span>
+                    </div>
+
+                    <div class="view-actions-right">
+                        <div class="view-switch-group">
+                            <button class="switch-btn active" id="btnToggleTableView">Table View</button>
+                            <button class="switch-btn" id="btnToggleTreeView">Proposed Tree</button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btnResetPreview" title="Reset all category changes back to original AI classifications">
+                            Reset Changes
+                        </button>
+                        <button class="btn btn-primary btn-sm btn-approve" id="btnApproveOrganize" disabled title="Confirm and execute file movements">
+                            Approve &amp; Organize
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div class="content-viewport" id="classificationTableWrapper">
+                    <table class="data-table" id="classificationTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 28%;">File Name</th>
+                                <th style="width: 10%;">Type</th>
+                                <th style="width: 18%;">Suggested Category</th>
+                                <th style="width: 14%;">Confidence</th>
+                                <th style="width: 15%;">Proposed Destination</th>
+                                <th style="width: 15%; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classificationTableBody">
+                            <tr class="empty-state-row">
+                                <td colspan="6">
+                                    <div class="table-empty-state">
+                                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                        </svg>
+                                        <p class="empty-title">No documents scanned yet</p>
+                                        <p class="empty-desc">Enter a folder path above and click <strong>Load Folder</strong>, or click <strong>Browse Folder</strong>.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Proposed Folder Tree Container (Alternative visual preview) -->
+                <div class="content-viewport" id="proposedTreeWrapper" style="display: none;">
+                    <div class="tree-preview-card">
+                        <div class="tree-card-header">
+                            <span class="tree-title">Proposed Destination Hierarchy</span>
+                            <span class="tree-sub">Visual representation of subfolders to be created</span>
+                        </div>
+                        <div class="tree-body" id="treeViewContainer">
+                            <div class="tree-empty-notice">Load a folder to view the proposed folder hierarchy.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: Searchable Document Ledger -->
+            <div class="workspace-view" id="viewLedger">
+                <div class="view-toolbar">
+                    <div class="view-title-block">
+                        <h2 class="view-heading">Searchable Document Ledger</h2>
+                        <span class="view-subheading">Persistent SQLite record of organized files and original locations</span>
+                    </div>
+                    <div class="ledger-actions">
+                        <button class="btn btn-secondary btn-sm" id="btnRefreshLedger">Refresh Ledger</button>
+                    </div>
+                </div>
+
+                <div class="ledger-filter-row">
+                    <div class="search-box">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="ledgerSearchInput" placeholder="Search by file name, keyword, category, or path...">
+                    </div>
+                    <select id="ledgerCategoryFilter" class="filter-select">
+                        <option value="All">All Categories</option>
+                    </select>
+                    <select id="ledgerStatusFilter" class="filter-select">
+                        <option value="All">All Statuses</option>
+                        <option value="ORGANIZED">Organized</option>
+                        <option value="REVERTED">Reverted</option>
+                    </select>
+                </div>
+
+                <div class="content-viewport">
+                    <table class="data-table" id="ledgerTable">
+                        <thead>
+                            <tr>
+                                <th>File Name</th>
+                                <th>Category</th>
+                                <th>Original Location</th>
+                                <th>Current Location</th>
+                                <th>Confidence</th>
+                                <th>Processed Date</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Launch</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerTableBody">
+                            <tr class="empty-state-row">
+                                <td colspan="8" class="text-center py-6">
+                                    <p class="text-muted">No organized documents recorded in ledger yet.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW 3: Related Documents Matrix -->
+            <div class="workspace-view" id="viewRelated">
+                <div class="view-toolbar">
+                    <div class="view-title-block">
+                        <h2 class="view-heading">Related Documents Matrix</h2>
+                        <span class="view-subheading">Contextually linked documents sharing domains, institutional codes, or topics</span>
+                    </div>
+                </div>
+                <div class="content-viewport" id="relatedMatrixContainer">
+                    <div class="empty-state-box">
+                        <p class="empty-title">Select a scanned folder to view cross-document relationships</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: Activity History & Rollback -->
+            <div class="workspace-view" id="viewAudit">
+                <div class="view-toolbar">
+                    <div class="view-title-block">
+                        <h2 class="view-heading">Activity &amp; Security Audit History</h2>
+                        <span class="view-subheading">Immutable event log of scans, user edits, executions, and rollbacks</span>
+                    </div>
+                    <div class="audit-actions">
+                        <button class="btn btn-warning btn-sm" id="btnUndoMove" disabled title="Revert last organization and restore files to original locations">
+                            Undo Last Organization
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="btnRefreshAudit">Refresh Logs</button>
+                    </div>
+                </div>
+                <div class="content-viewport">
+                    <div class="audit-list" id="auditTimeline">
+                        <div class="text-muted p-4">Loading audit log...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: Document Overview / Analytics -->
+            <div class="workspace-view" id="viewOverview">
+                <div class="view-toolbar">
+                    <div class="view-title-block">
+                        <h2 class="view-heading">Document Overview</h2>
+                        <span class="view-subheading">High-level repository statistics and supported formats</span>
+                    </div>
+                </div>
+                <div class="overview-grid" id="overviewGrid">
+                    <div class="stat-card">
+                        <span class="stat-title">Total Documents</span>
+                        <span class="stat-value" id="overviewTotalDocs">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-title">Categories Discovered</span>
+                        <span class="stat-value" id="overviewCategoryCount">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-title">Ledger Records</span>
+                        <span class="stat-value" id="overviewLedgerCount">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-title">Safety Status</span>
+                        <span class="stat-value text-teal" id="overviewSafetyMode">Read-Only Enforced</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integrated Chatbot Assistant Dock -->
+            <section class="chat-assistant-dock" id="chatDock">
+                <div class="chat-dock-header" id="chatDockToggle">
+                    <div class="dock-title">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>AI Assistant</span>
+                        <span class="assistant-pill">Active</span>
+                    </div>
+                    <div class="dock-controls">
+                        <span class="dock-collapse-icon" id="dockCollapseIcon">▲</span>
+                    </div>
+                </div>
+
+                <div class="chat-dock-body" id="chatDockBody">
+                    <div class="chat-stream" id="chatMessages">
+                        <div class="chat-bubble ai">
+                            <p><strong>DocuAgent Ready.</strong> Enter a folder path above or click <em>Browse Folder</em> to inspect documents in read-only mode. You can also give me natural-language instructions.</p>
+                            <div class="quick-command-row">
+                                <button class="chip-cmd" data-cmd="Organize the files in this folder">Organize files</button>
+                                <button class="chip-cmd" data-cmd="Show me all scholarship-related documents">Scholarship docs</button>
+                                <button class="chip-cmd" data-cmd="Proceed with organization">Proceed</button>
+                                <button class="chip-cmd" data-cmd="Undo last organization">Undo move</button>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="chat-entry-form" id="chatForm">
+                        <input type="text" id="chatInput" placeholder="Ask AI or give command (e.g. 'Change College_Circular.pdf to Academic')..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary btn-sm" id="btnChatSend">Send</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <!-- 3. RIGHT DETAILS INSPECTOR PANEL -->
+        <aside class="app-inspector" id="appInspector">
+            <div class="inspector-header">
+                <span class="inspector-title">Document Details</span>
+                <span class="inspector-badge" id="inspectorBadge">None Selected</span>
+            </div>
+
+            <div class="inspector-body" id="inspectorBody">
+                <div class="inspector-empty" id="inspectorEmptyState">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="12" y1="18" x2="12" y2="12"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    <p>Select any document row from the classification table to inspect metadata and edit categories.</p>
+                </div>
+
+                <div class="inspector-content" id="inspectorContent" style="display: none;">
+                    <!-- Selected File Header -->
+                    <div class="detail-file-card">
+                        <span class="detail-ext" id="detailExtBadge">PDF</span>
+                        <div class="detail-name-wrap">
+                            <span class="detail-name" id="detailFileName">Document.pdf</span>
+                            <span class="detail-meta" id="detailFileSize">-- KB</span>
+                        </div>
+                    </div>
+
+                    <!-- Category Editing Controls -->
+                    <div class="detail-section">
+                        <label class="detail-label">Classification Category</label>
+                        <div class="detail-category-row">
+                            <span class="active-cat-tag" id="detailActiveCategory">Category</span>
+                            <span class="confidence-pill" id="detailConfidencePill">98%</span>
+                        </div>
+                        <div class="cat-edit-box">
+                            <label class="sub-label">Change Category to:</label>
+                            <select id="detailCategorySelect" class="form-select"></select>
+                            <div class="custom-cat-input-row">
+                                <input type="text" id="detailCustomCategoryInput" placeholder="Or enter new category..." class="form-input-sm">
+                                <button class="btn btn-secondary btn-sm" id="btnApplyCategoryEdit">Update</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paths Info -->
+                    <div class="detail-section">
+                        <label class="detail-label">Current Location</label>
+                        <div class="code-box" id="detailCurrentPath">--</div>
+
+                        <label class="detail-label mt-2">Proposed Destination</label>
+                        <div class="code-box text-teal" id="detailProposedPath">--</div>
+                    </div>
+
+                    <!-- Related Documents List -->
+                    <div class="detail-section">
+                        <label class="detail-label">Related Documents</label>
+                        <div class="related-list" id="detailRelatedList">
+                            <span class="text-muted text-xs">No direct relationships detected.</span>
+                        </div>
+                    </div>
+
+                    <!-- Extracted Text Snippet -->
+                    <div class="detail-section">
+                        <label class="detail-label">Content Summary Snippet</label>
+                        <div class="snippet-box" id="detailSnippetBox">No text extracted.</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- MODAL 1: Explicit Human-in-the-Loop Approval Confirmation -->
+    <div class="modal-backdrop" id="approvalModal">
+        <div class="modal-window modal-md">
+            <div class="modal-title-bar">
+                <div class="modal-heading-group">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <h3>Confirm Folder Organization Plan</h3>
+                </div>
+                <button class="modal-close-btn" id="btnApprovalClose">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-summary-banner">
+                    <div class="summary-metric">
+                        <span class="metric-num" id="approveFilesCount">0</span>
+                        <span class="metric-label">Files to Move</span>
+                    </div>
+                    <div class="summary-arrow">&rarr;</div>
+                    <div class="summary-metric">
+                        <span class="metric-num" id="approveFolderCount">0</span>
+                        <span class="metric-label">Subfolders to Create</span>
+                    </div>
+                </div>
+
+                <div class="target-path-card">
+                    <span class="card-caption">ORGANIZING INSIDE ORIGINAL DIRECTORY:</span>
+                    <span class="target-path-code" id="approveTargetFolder">--</span>
+                </div>
+
+                <div class="subfolders-breakdown">
+                    <label class="detail-label">Approved Subfolder Breakdown:</label>
+                    <div class="breakdown-pills" id="approveBreakdownGrid"></div>
+                </div>
+
+                <div class="safety-notice-box">
+                    <strong>Write Permission Disclosure:</strong>
+                    <p>Once approved, the agent will create the category subfolders inside this original folder and move the files into their respective destinations. Safe collision prevention will rename identical names to <code>file (1).ext</code> without overwriting. You can rollback anytime with 1-Click Undo.</p>
+                </div>
+            </div>
+            <div class="modal-actions-bar">
+                <button class="btn btn-secondary" id="btnApprovalCancel">Cancel / Review More</button>
+                <button class="btn btn-primary" id="btnApprovalConfirm">Approve &amp; Execute Organization</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Create New Folder -->
+    <div class="modal-backdrop" id="newFolderModal">
+        <div class="modal-window">
+            <div class="modal-title-bar">
+                <h3>Create New Folder</h3>
+                <button class="modal-close-btn" id="btnNewFolderClose">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="form-row">
+                    <label class="form-label">Parent Directory</label>
+                    <input type="text" id="newFolderParentInput" class="form-control" placeholder="C:\Users\YourName\Documents">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">New Folder Name</label>
+                    <input type="text" id="newFolderNameInput" class="form-control" placeholder="e.g. My_College_Documents">
+                </div>
+            </div>
+            <div class="modal-actions-bar">
+                <button class="btn btn-secondary" id="btnNewFolderCancel">Cancel</button>
+                <button class="btn btn-primary" id="btnNewFolderSubmit">Create &amp; Select</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Optional File Upload -->
+    <div class="modal-backdrop" id="uploadModal">
+        <div class="modal-window">
+            <div class="modal-title-bar">
+                <h3>Upload Individual Documents</h3>
+                <button class="modal-close-btn" id="btnUploadClose">&times;</button>
+            </div>
+            <div class="modal-content">
+                <p class="text-sm text-muted">Upload individual supported files (.pdf, .docx, .xlsx, .txt) to organize. This operates as a separate workflow without modifying other local folders.</p>
+                <div class="form-row mt-3">
+                    <label class="form-label">Destination Folder</label>
+                    <input type="text" id="uploadDestInput" class="form-control" placeholder="Target folder or leave empty for staging">
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Select Files</label>
+                    <input type="file" id="uploadFileInput" class="form-control" multiple accept=".pdf,.docx,.doc,.xlsx,.xls,.txt,.csv,.md">
+                </div>
+            </div>
+            <div class="modal-actions-bar">
+                <button class="btn btn-secondary" id="btnUploadCancel">Cancel</button>
+                <button class="btn btn-primary" id="btnUploadSubmit">Upload Files</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Visual Folder Browser Modal -->
+    <div class="modal-backdrop" id="folderBrowserModal">
+        <div class="modal-window modal-md">
+            <div class="modal-title-bar">
+                <div class="modal-heading-group">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h3>Select Local Folder</h3>
+                </div>
+                <button class="modal-close-btn" id="btnFolderBrowserClose">&times;</button>
+            </div>
+            <div class="modal-content">
+                <!-- Quick Locations -->
+                <div class="form-row">
+                    <label class="form-label">Quick Locations:</label>
+                    <div class="breakdown-pills" id="browserQuickJumps">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Current Path Navigator -->
+                <div class="form-row">
+                    <label class="form-label">Current Location:</label>
+                    <div class="input-action-row">
+                        <input type="text" id="browserCurrentPathInput" class="form-control font-mono text-xs" style="flex:1;">
+                        <button class="btn btn-secondary btn-sm" id="btnBrowserGoUp" title="Go up one folder level">&uarr; Up Level</button>
+                    </div>
+                </div>
+
+                <!-- Subdirectories List Box -->
+                <div class="form-row">
+                    <label class="form-label">Subfolders (Click to open):</label>
+                    <div class="folder-browser-list" id="browserDirsList" style="max-height: 220px; overflow-y: auto; background: var(--bg-input); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 6px;">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions-bar" style="justify-content: space-between;">
+                <div>
+                    <button class="btn btn-ghost btn-sm" id="btnLaunchNativePicker" title="Attempt opening native OS window">Launch OS Window</button>
+                    <button class="btn btn-ghost btn-sm" id="btnTriggerWebkitPicker" title="Open Browser Directory Selector">Browser Selector</button>
+                    <input type="file" id="browserWebkitPickerInput" webkitdirectory directory style="display:none;">
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" id="btnFolderBrowserCancel">Cancel</button>
+                    <button class="btn btn-primary" id="btnFolderBrowserSelect">Select This Folder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="toast-stack" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
