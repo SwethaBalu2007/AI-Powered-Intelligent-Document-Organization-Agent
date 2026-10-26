@@ -383,35 +383,47 @@ def create_new_folder(payload: Dict[str, Any] = Body(...)):
 @app.post("/api/folder/upload")
 async def upload_documents(
     target_folder: Optional[str] = None,
-    files: List[UploadFile] = File(...)
+    files: List[UploadFile] = File(default=[])
 ):
     """
     Uploads individual supported documents to target folder or a dedicated staging folder.
     """
-    base_target = target_folder or active_session.get("current_folder")
-    if not base_target or not os.path.isdir(base_target):
-        workspace = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        base_target = os.path.join(workspace, "Uploaded_Documents")
+    try:
+        if not files:
+            raise HTTPException(status_code=400, detail="Please select at least one document file to upload.")
+
+        resolved = resolve_folder_path(target_folder) if target_folder else None
+        base_target = resolved or (target_folder if target_folder and os.path.isdir(target_folder) else None) or active_session.get("current_folder")
+
+        if not base_target or not os.path.isdir(base_target):
+            workspace = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+            base_target = os.path.join(workspace, "Uploaded_Documents")
+
         os.makedirs(base_target, exist_ok=True)
 
-    saved_files = []
-    for f in files:
-        if not f.filename:
-            continue
-        clean_name = os.path.basename(f.filename)
-        dest_path = os.path.join(base_target, clean_name)
-        with open(dest_path, "wb") as out_f:
-            out_f.write(await f.read())
-        saved_files.append({"file_name": clean_name, "path": dest_path})
+        saved_files = []
+        for f in files:
+            if not f.filename:
+                continue
+            clean_name = os.path.basename(f.filename)
+            dest_path = os.path.join(base_target, clean_name)
+            content = await f.read()
+            with open(dest_path, "wb") as out_f:
+                out_f.write(content)
+            saved_files.append({"file_name": clean_name, "path": dest_path})
 
-    record_activity("FILES_UPLOADED", base_target, f"Uploaded {len(saved_files)} documents to {base_target}")
-    return {
-        "success": True,
-        "target_folder": base_target,
-        "uploaded_count": len(saved_files),
-        "files": saved_files,
-        "message": f"Successfully stored {len(saved_files)} files in '{base_target}'"
-    }
+        record_activity("FILES_UPLOADED", base_target, f"Uploaded {len(saved_files)} documents to {base_target}")
+        return {
+            "success": True,
+            "target_folder": base_target,
+            "uploaded_count": len(saved_files),
+            "files": saved_files,
+            "message": f"Successfully stored {len(saved_files)} files in '{base_target}'"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
 @app.post("/api/folder/scan")

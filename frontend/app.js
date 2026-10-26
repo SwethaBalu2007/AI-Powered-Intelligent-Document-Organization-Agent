@@ -3,7 +3,7 @@
  * Professional, human-designed 3-column desktop document management interface.
  */
 
-const API_BASE = "";
+const API_BASE = (typeof window !== "undefined" && window.location && window.location.protocol === "file:") ? "http://127.0.0.1:8000" : "";
 
 const state = {
     currentFolder: null,
@@ -270,11 +270,18 @@ async function triggerScan(folderPath) {
             body: JSON.stringify({ folder_path: folderPath })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Scan failed");
+        if (!res.ok) {
+            const errMsg = typeof data.detail === "string" ? data.detail : (data.detail ? JSON.stringify(data.detail) : "Scan failed");
+            throw new Error(errMsg);
+        }
         handleScanSuccess(data);
         showToast(`Analyzed ${data.total_documents} documents in read-only mode.`);
     } catch (e) {
-        showToast(e.message, "error");
+        let msg = e.message;
+        if (msg === "Failed to fetch") {
+            msg = "Render server is waking up (cold boot). Please wait ~30 seconds and retry.";
+        }
+        showToast(msg, "error");
         setWorkflowStatus("Failed");
     }
 }
@@ -1045,14 +1052,21 @@ function initModalUtilities() {
                 body: formData
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || "Upload failed");
+            if (!res.ok) {
+                const errMsg = typeof data.detail === "string" ? data.detail : (data.detail ? JSON.stringify(data.detail) : "Upload failed");
+                throw new Error(errMsg);
+            }
 
             upModal.classList.remove("active");
             showToast(data.message, "success");
             document.getElementById("folderPathInput").value = data.target_folder;
             await triggerScan(data.target_folder);
         } catch (e) {
-            showToast(e.message, "error");
+            let msg = e.message;
+            if (msg === "Failed to fetch") {
+                msg = "Render server is waking up (cold boot). Please wait ~30 seconds and retry.";
+            }
+            showToast(msg, "error");
         } finally {
             btnSubmitUp.disabled = false;
             btnSubmitUp.textContent = "Upload Files";
